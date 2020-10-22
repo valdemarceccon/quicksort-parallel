@@ -1,46 +1,29 @@
-public class QuickSort extends Thread {
+public class QuickSort {
     private final int start;
     private final int end;
     private final int[] arr;
-    public static MutexInt m = new MutexInt(0);
-    private final MutexInt mi;
 
-    private QuickSort(MutexInt mi, int start, int end, int[] arr) {
-        this.mi = mi;
+    private QuickSort(int start, int end, int[] arr) {
         this.start = start;
         this.end = end;
         this.arr = arr;
     }
 
     public QuickSort(int[] arr) {
-        this(new MutexInt(0), 0, arr.length - 1, arr);
+        this(0, arr.length - 1, arr);
     }
 
-    @Override
-    public void run() {
+    public void sort() {
         if (start >= end)
             return;
 
         int p = partition(arr, start, end);
 
-        QuickSort left = new QuickSort(mi, start, p - 1, arr);
-        QuickSort right = new QuickSort(mi, p + 1, end, arr);
+        QuickSort left = new QuickSort(start, p - 1, arr);
+        QuickSort right = new QuickSort(p + 1, end, arr);
 
-        try {
-            if (mi.getValue() <= Main.MAX_THREADS) {
-                mi.add(2);
-                left.start();
-                right.start();
-
-                left.join();
-                right.join();
-            } else {
-                left.run();
-                right.run();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        left.sort();
+        right.sort();
     }
 
     static int partition(int[] arr, int start, int end) {
